@@ -109,7 +109,7 @@
     "postgresql": {
       "path": "plugins/postgresql",
       "version": 0.1,
-      "connectionString": "postgres://user:pass@localhost:5432",
+      "connectionString": "postgres://username:password@postgresql:5432",
       "dependencies": [
         {
           "module": "pg",
