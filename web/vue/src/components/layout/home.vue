@@ -1,34 +1,46 @@
-<template lang='pug'>
-  section.contain.grd-row
-    .grd-row-col-3-6(v-html='left')
-    .grd-row-col-3-6.txt--center
-      img(src='static/gekko.jpg')
-      p
-        em The most valuable commodity I know of is information.
+<template>
+  <div class="contain">
+    <div v-for="exchange in portfolios" style="padding-bottom: 3rem">
+      <h3>💱 {{ exchange.exchange.toUpperCase() }}</h3>
+      <div v-if="!exchange.balances" class="no-balances">
+        🛎️ Eres pobre y no tienes balances aquí
+        <h1>😭💸😭💸😭💸</h1>
+      </div>
+      <table v-else>
+        <tr>
+          <th>Balance disponible</th>
+          <th>Moneda</th>
+        </tr>
+        <tr v-for="balance in exchange.balances">
+          <td style="text-align: right">{{ balance.amount }}</td>
+          <td>{{ balance.name }}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
 </template>
 
 <script>
-import marked from '../../tools/marked';
-
-const left = marked(`
-
-## Gekko
-
-Gekko is a Bitcoin trading bot and backtesting platform that
-connects to popular Bitcoin exchanges. It is written in javascript
-and runs on nodejs.
-
-[Find out more](https://gekko.wizb.it/).
-
-*Gekko is 100% free (open source), if you paid for this you have been scammed.*
-
-`);
+import { get } from '../../tools/ajax';
 
 export default {
   data: () => {
     return {
-      left
+      portfolios: [],
     }
+  },
+
+  mounted() {
+    get('exchanges/portfolios', (err, data) => {
+      this.portfolios = data;
+    });
   }
 }
 </script>
+
+<style scoped>
+.no-balances {
+  padding: 0.4rem 1rem;
+  font-size: 1.3rem;
+}
+</style>

@@ -37,6 +37,7 @@
     "moment": "^2.22.1",
     "request-promise": "^4.2.2",
     "retry": "^0.12.0",
-    "therocktrading": "^0.9.0"
+    "therocktrading": "^0.9.0",
+    "node.bittrex.api": "^1.0.0"
   }
 }

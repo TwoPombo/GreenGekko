@@ -1,27 +1,26 @@
-const _ = require('lodash');
-const fs = require('co-fs');
-
+const fs = require('file-system');
 const gekkoRoot = __dirname + '/../../';
 
-module.exports = function *() {
-  const strategyDir = yield fs.readdir(gekkoRoot + 'strategies');
-  const strats = strategyDir
-    .filter(f => _.last(f, 3).join('') === '.js')
-    .map(f => {
-      return { name: f.slice(0, -3) }
-    });
+const strategiesConfigPath = `${gekkoRoot}config/strategies`;
 
-  // for every strat, check if there is a config file and add it
-  const stratConfigPath = gekkoRoot + 'config/strategies';
-  const strategyParamsDir = yield fs.readdir(stratConfigPath);
+module.exports = async (ctx) => {
+  const strategies = [];
+  const strategyParamsDir = [];
 
-  for(let i = 0; i < strats.length; i++) {
-    let strat = strats[i];
-    if(strategyParamsDir.indexOf(strat.name + '.toml') !== -1)
-      strat.params = yield fs.readFile(stratConfigPath + '/' + strat.name + '.toml', 'utf8')
-    else
-      strat.params = '';
-  }
+  await fs.recurseSync(`${gekkoRoot}strategies`, ['*.js'], async (_, filename) => {
+    strategies.push({name: filename.slice(0, -3)});
+  });
+  await fs.recurseSync(strategiesConfigPath, ['*.toml'], async (_, filename) => {
+    strategyParamsDir.push(filename);
+  });
 
-  this.body = strats;
-}
+  ctx.body = await Promise.all(strategies.map(async strategy => {
+    if (strategyParamsDir.indexOf(`${strategy.name}.toml`)!== -1) {
+      strategy.params = await fs.readFileSync(`${strategiesConfigPath}/${strategy.name}.toml`, 'utf8')
+    } else {
+      strategy.params = '';
+    }
+
+    return strategy;
+  }));
+};

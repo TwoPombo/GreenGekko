@@ -45,19 +45,22 @@ class Portfolio {
       }
 
       // only include the currency/asset of this market
-      const balances = [ this.config.currency, this.config.asset ]
-        .map(name => {
-          let item = _.find(fullPortfolio, {name});
+      if (this.config.currency && this.config.asset) {
+        this.balances = [ this.config.currency, this.config.asset ]
+          .map(name => {
+            let item = _.find(fullPortfolio, {name});
 
-          if(!item) {
-            // assume we have 0
-            item = { name, amount: 0 };
-          }
+            if(!item) {
+              // assume we have 0
+              item = { name, amount: 0 };
+            }
 
-          return item;
-        });
-
-      this.balances = balances;
+            return item;
+          });
+      } else {
+        console.log(fullPortfolio);
+        this.balances = fullPortfolio;
+      }
 
       if(_.isFunction(callback))
         callback();
@@ -65,7 +68,7 @@ class Portfolio {
 
     this.api.getPortfolio(set);
   }
-  
+
   setFee(callback) {
     this.api.getFee((err, fee) => {
       if(err)

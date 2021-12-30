@@ -1,16 +1,15 @@
 const config = require('./vue/dist/UIconfig');
 
-const koa = require('koa');
+const Koa = require('koa');
 const serve = require('koa-static');
-const cors = require('koa-cors');
 const _ = require('lodash');
-const bodyParser = require('koa-bodyparser');
 
 const opn = require('opn');
 const server = require('http').createServer();
 const router = require('koa-router')();
 const ws = require('ws');
-const app = koa();
+const app = new Koa();
+const koaBody = require('koa-body');
 
 const WebSocketServer = require('ws').Server;
 const wss = new WebSocketServer({ server: server });
@@ -87,18 +86,19 @@ router.get('/api/apiKeys', apiKeys.get);
 const listWraper = require(ROUTE('list'));
 router.get('/api/imports', listWraper('imports'));
 router.get('/api/gekkos', listWraper('gekkos'));
+router.get('/api/exchanges/portfolios', require(ROUTE('portfolios')));
 router.get('/api/exchanges', require(ROUTE('exchanges')));
 
-router.post('/api/addApiKey', apiKeys.add);
-router.post('/api/removeApiKey', apiKeys.remove);
-router.post('/api/scan', require(ROUTE('scanDateRange')));
-router.post('/api/scansets', require(ROUTE('scanDatasets')));
-router.post('/api/backtest', require(ROUTE('backtest')));
-router.post('/api/import', require(ROUTE('import')));
-router.post('/api/startGekko', require(ROUTE('startGekko')));
-router.post('/api/stopGekko', require(ROUTE('stopGekko')));
-router.post('/api/deleteGekko', require(ROUTE('deleteGekko')));
-router.post('/api/getCandles', require(ROUTE('getCandles')));
+router.post('/api/addApiKey', koaBody({ multipart: true }), apiKeys.add);
+router.post('/api/removeApiKey', koaBody({ multipart: true }), apiKeys.remove);
+router.post('/api/scan', koaBody({ multipart: true }), require(ROUTE('scanDateRange')));
+router.post('/api/scansets', koaBody({ multipart: true }), require(ROUTE('scanDatasets')));
+router.post('/api/backtest', koaBody({ multipart: true }), require(ROUTE('backtest')));
+router.post('/api/import', koaBody({ multipart: true }), require(ROUTE('import')));
+router.post('/api/startGekko', koaBody({ multipart: true }), require(ROUTE('startGekko')));
+router.post('/api/stopGekko', koaBody({ multipart: true }), require(ROUTE('stopGekko')));
+router.post('/api/deleteGekko', koaBody({ multipart: true }), require(ROUTE('deleteGekko')));
+router.post('/api/getCandles', koaBody({ multipart: true }), require(ROUTE('getCandles')));
 
 
 // incoming WS:
@@ -106,10 +106,10 @@ router.post('/api/getCandles', require(ROUTE('getCandles')));
 //   ws.on('message', _.noop);
 // });
 
+
 app
-  .use(cors())
+  .use(require('koa2-cors')())
   .use(serve(WEBROOT + 'vue/dist'))
-  .use(bodyParser())
   .use(require('koa-logger')())
   .use(router.routes())
   .use(router.allowedMethods());
@@ -134,6 +134,6 @@ server.listen(config.api.port, config.api.host, '::', () => {
     opn(location)
       .catch(err => {
         console.log('Something went wrong when trying to open your web browser. UI is running on ' + location + '.');
-    });
+      });
   }
 });

@@ -87,31 +87,45 @@ Trader.prototype.getPortfolio = function(callback) {
     }
 
     data = data.result;
+    let portfolio = [];
 
-    let assetEntry = _.find(data, i => i.Currency == this.asset);
-    let currencyEntry = _.find(data, i => i.Currency == this.currency);
+    if (this.asset && this.currency) {
+      let assetEntry = _.find(data, i => i.Currency == this.asset);
+      let currencyEntry = _.find(data, i => i.Currency == this.currency);
 
-    if(_.isUndefined(assetEntry)) {
-      assetEntry = {
-        Available: 0.0,
-        Currency: this.asset
+      if(_.isUndefined(assetEntry)) {
+        assetEntry = {
+          Available: 0.0,
+          Currency: this.asset
+        }
       }
-    }
 
-    if(_.isUndefined(currencyEntry)) {
-      currencyEntry = {
-        Available: 0.0,
-        Currency: this.currency
+      if(_.isUndefined(currencyEntry)) {
+        currencyEntry = {
+          Available: 0.0,
+          Currency: this.currency
+        }
       }
+
+      const assetAmount = parseFloat( assetEntry.Available );
+      const currencyAmount = parseFloat( currencyEntry.Available );
+
+      portfolio = [
+        { name: this.asset, amount: assetAmount },
+        { name: this.currency, amount: currencyAmount }
+      ];
+    } else {
+      portfolio = data.reduce((balances, i) => {
+        const currencyAmount = parseFloat(i.Available);
+
+        if (currencyAmount > 0) {
+          return balances.push({
+            name: i.Currency,
+            amount: currencyAmount
+          });
+        }
+      }, []);
     }
-
-    const assetAmount = parseFloat( assetEntry.Available );
-    const currencyAmount = parseFloat( currencyEntry.Available );
-
-    const portfolio = [
-      { name: this.asset, amount: assetAmount },
-      { name: this.currency, amount: currencyAmount }
-    ];
 
     callback(undefined, portfolio);
   }
@@ -621,7 +635,7 @@ Trader.getCapabilities = function() {
     tid: 'tid',
     providesHistory: 'date',
     providesFullHistory: false,
-    tradable: false,
+    tradable: true,
     forceReorderDelay: true,
     gekkoBroker: '0.6.0'
   };

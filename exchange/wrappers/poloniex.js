@@ -256,21 +256,34 @@ Trader.prototype.getPortfolio = function(callback) {
       return callback(err);
     }
 
-    var assetAmount = parseFloat( data[this.asset] );
-    var currencyAmount = parseFloat( data[this.currency] );
+    let portfolio = [];
 
-    if(
-      !_.isNumber(assetAmount) || _.isNaN(assetAmount) ||
-      !_.isNumber(currencyAmount) || _.isNaN(currencyAmount)
-    ) {
-      assetAmount = 0;
-      currencyAmount = 0;
+    if (this.asset && this.currency) {
+      let assetAmount = parseFloat( data[this.asset] );
+      let currencyAmount = parseFloat( data[this.currency] );
+
+      if(
+        !_.isNumber(assetAmount) || _.isNaN(assetAmount) ||
+        !_.isNumber(currencyAmount) || _.isNaN(currencyAmount)
+      ) {
+        assetAmount = 0;
+        currencyAmount = 0;
+      }
+
+      portfolio = [
+        { name: this.asset, amount: assetAmount },
+        { name: this.currency, amount: currencyAmount }
+      ];
+    } else {
+      _.forEach(data, (value, key) => {
+        const currencyAmount = parseFloat(value);
+
+        if (currencyAmount > 0) {
+          portfolio.push({ name: key, amount: currencyAmount });
+        }
+      });
     }
 
-    var portfolio = [
-      { name: this.asset, amount: assetAmount },
-      { name: this.currency, amount: currencyAmount }
-    ];
 
     callback(undefined, portfolio);
   }
@@ -369,7 +382,7 @@ Trader.prototype.createOrder = function(side, amount, price, callback) {
   const fetch = next => {
     this.poloniex[side](this.currency, this.asset, price, amount, this.processResponse(next, 'order', side))
   };
-  retry(null, fetch, handle);  
+  retry(null, fetch, handle);
 }
 
 Trader.prototype.buy = function(amount, price, callback) {
@@ -466,7 +479,7 @@ Trader.prototype.cancelOrder = function(order, callback) {
 
     callback(undefined, false, data);
   };
-  
+
   const fetch = next => this.poloniex.cancelOrder(this.currency, this.asset, order, this.processResponse(next, 'cancelOrder', order));
   retry(null, fetch, handle);
 }

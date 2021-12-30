@@ -7,8 +7,8 @@ const transformMarkets = backendData => {
     return {};
   }
 
-  var exchangesRaw = backendData;
-  var exchangesTemp = {};
+  let exchangesRaw = backendData;
+  let exchangesTemp = {};
 
   exchangesRaw.forEach(e => {
     exchangesTemp[e.slug] = exchangesTemp[e.slug] || {markets: {}};
@@ -27,6 +27,7 @@ const transformMarkets = backendData => {
     exchangesTemp[e.slug].tradable = e.tradable ? true : false;
     exchangesTemp[e.slug].requires = e.requires;
   });
+
 
   return exchangesTemp;
 }

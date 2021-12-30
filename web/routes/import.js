@@ -10,16 +10,12 @@ const base = require('./baseConfig');
 
 // starts an import
 // requires a post body with a config object
-module.exports = function *() {
+module.exports = (ctx) => {
   let mode = 'importer';
-
   let config = {}
-
-  _.merge(config, base, this.request.body);
-
   let importId = (Math.random() + '').slice(3);
-
   let errored = false;
+  _.merge(config, base, ctx.request.body);
 
   console.log('Import', importId, 'started');
 
@@ -60,7 +56,7 @@ module.exports = function *() {
     broadcast(wsEvent);
   });
 
-  let daterange = this.request.body.importer.daterange;
+  let daterange = ctx.request.body.importer.daterange;
 
   const _import = {
     watch: config.watch,
@@ -71,5 +67,5 @@ module.exports = function *() {
   }
 
   importManager.add(_import);
-  this.body = _import;
+  ctx.body = _import;
 }

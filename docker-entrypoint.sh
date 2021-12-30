@@ -20,4 +20,10 @@ if [ ! -d './exchange/node_modules' ]; then
   cd ../ || exit;
 fi
 
+if [ ! -d './web/vue' ]; then
+  cd web/vue || exit;
+  yarn install;
+  cd ../../ || exit;
+fi
+
 exec node gekko "$@"

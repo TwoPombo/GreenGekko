@@ -36,6 +36,7 @@ export const connect = () => {
 
     info.connected = true;
     bus.$emit('WS_STATUS_CHANGE', info);
+    console.log('WS: connected');
     initializeState();
   }
   socket.onclose = () => {

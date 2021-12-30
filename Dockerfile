@@ -1,8 +1,5 @@
 FROM node:10.15
 
-ENV HOST localhost
-ENV PORT 3000
-
 # Create app directory
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
